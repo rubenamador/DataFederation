@@ -1,4 +1,6 @@
 import akka.actor._
+import akka.actor.Address
+import akka.cluster.Cluster
 
 case object PingMessage
 case object PongMessage
@@ -41,6 +43,9 @@ object PingPongTest extends App {
     val system = ActorSystem("PingPongSystem")
     val pong = system.actorOf(Props[Pong], name = "pong")
     val ping = system.actorOf(Props(new Ping(pong)), name = "ping")
+    // create the cluster
+    val cluster = Cluster(system)
+    cluster.join(cluster.selfAddress)
     // start the action
     ping ! StartMessage
     // commented-out so you can see all the output
