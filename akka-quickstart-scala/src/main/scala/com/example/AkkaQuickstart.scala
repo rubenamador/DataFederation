@@ -1,3 +1,5 @@
+package com.example
+
 import akka.actor._
 import akka.actor.Address
 import akka.cluster.Cluster
@@ -49,5 +51,5 @@ object PingPongTest extends App {
     // start the action
     ping ! StartMessage
     // commented-out so you can see all the output
-    //system.shutdown
+    system.terminate()
 }
