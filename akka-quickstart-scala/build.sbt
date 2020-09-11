@@ -15,7 +15,8 @@ libraryDependencies ++= Seq(
   "ch.qos.logback" % "logback-classic" % "1.2.3",
   "com.typesafe.akka" %% "akka-actor-testkit-typed" % AkkaVersion % Test,
   "org.scalatest" %% "scalatest" % "3.1.0" % Test,
-  "com.typesafe.akka" %% "akka-cluster" % AkkaVersion
+  "com.typesafe.akka" %% "akka-cluster" % AkkaVersion,
+  "com.typesafe.akka" %% "akka-cluster-tools" % AkkaVersion
 )
 
 scalaVersion in ThisBuild := projectScalaVersion

@@ -3,6 +3,7 @@ package com.example
 import akka.actor._
 import akka.actor.Address
 import akka.cluster.Cluster
+import akka.cluster.client._
 
 case object PingMessage
 case object PongMessage
@@ -45,11 +46,24 @@ object PingPongTest extends App {
     val system = ActorSystem("PingPongSystem")
     val pong = system.actorOf(Props[Pong], name = "pong")
     val ping = system.actorOf(Props(new Ping(pong)), name = "ping")
+    
     // create the cluster
     val cluster = Cluster(system)
     cluster.join(cluster.selfAddress)
+    
+    // create the client
+    ClusterClientReceptionist(system).registerService(pong)
+    ClusterClientReceptionist(system).registerService(ping)
+    val initialContacts = Set(
+      ActorPath.fromString("akka://OtherSys@host1:2552/system/receptionist"),
+      ActorPath.fromString("akka://OtherSys@host2:2552/system/receptionist"))
+    val settings = ClusterClientSettings(system).withInitialContacts(initialContacts)
+    val client = system.actorOf(ClusterClient.props(settings), "client")
+    
     // start the action
-    ping ! StartMessage
+    //ping ! StartMessage
+    client ! ClusterClient.Send("/user/ping", StartMessage, localAffinity = true) //sending first ping
+    
     // commented-out so you can see all the output
     system.terminate()
 }
