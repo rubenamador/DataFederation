@@ -55,8 +55,8 @@ object PingPongTest extends App {
     ClusterClientReceptionist(system).registerService(pong)
     ClusterClientReceptionist(system).registerService(ping)
     val initialContacts = Set(
-      ActorPath.fromString("akka://OtherSys@host1:2552/system/receptionist"),
-      ActorPath.fromString("akka://OtherSys@host2:2552/system/receptionist"))
+      ActorPath.fromString("akka://PingPongSystem@127.0.0.1:2551/system/receptionist"),
+      ActorPath.fromString("akka://PingPongSystem@127.0.0.1:2552/system/receptionist"))
     val settings = ClusterClientSettings(system).withInitialContacts(initialContacts)
     val client = system.actorOf(ClusterClient.props(settings), "client")
     
