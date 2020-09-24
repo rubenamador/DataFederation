@@ -42,7 +42,7 @@ class Pong extends Actor {
     }
 }
 
-object PingPongTest extends App {
+object ClusterSystem extends App {
     val system = ActorSystem("PingPongSystem")
     val pong = system.actorOf(Props[Pong], name = "pong")
     val ping = system.actorOf(Props(new Ping(pong)), name = "ping")
@@ -50,19 +50,8 @@ object PingPongTest extends App {
     // create the cluster
     val cluster = Cluster(system)
     cluster.join(cluster.selfAddress)
-    
-    // create the client
     ClusterClientReceptionist(system).registerService(pong)
     ClusterClientReceptionist(system).registerService(ping)
-    val initialContacts = Set(
-      ActorPath.fromString("akka://PingPongSystem@127.0.0.1:2551/system/receptionist"),
-      ActorPath.fromString("akka://PingPongSystem@127.0.0.1:2552/system/receptionist"))
-    val settings = ClusterClientSettings(system).withInitialContacts(initialContacts)
-    val client = system.actorOf(ClusterClient.props(settings), "client")
-    
-    // start the action
-    //ping ! StartMessage
-    client ! ClusterClient.Send("/user/ping", StartMessage, localAffinity = true) //sending first ping
     
     // commented-out so you can see all the output
     system.terminate()

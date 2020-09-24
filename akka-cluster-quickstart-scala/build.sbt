@@ -1,4 +1,4 @@
-name := "akka-quickstart-scala"
+name := "akka-cluster-quickstart-scala"
 
 version := "1.0"
 
