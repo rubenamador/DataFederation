@@ -5,6 +5,8 @@ import akka.actor.Address
 import akka.cluster.Cluster
 import akka.cluster.client._
 
+import scala.io.StdIn.readLine
+
 case object PingMessage
 case object PongMessage
 case object StartMessage
@@ -14,7 +16,7 @@ class Ping(pong: ActorRef) extends Actor {
     var count = 0
     def incrementAndPrint { count += 1; println("ping") }
     def receive = {
-        case StartMessage =>
+        case "ping" =>
             incrementAndPrint
             pong ! PingMessage
         case PongMessage =>
@@ -22,7 +24,7 @@ class Ping(pong: ActorRef) extends Actor {
             if (count > 99) {
                 sender ! StopMessage
                 println("ping stopped")
-                context.stop(self)
+                //context.stop(self)
             } else {
                 sender ! PingMessage
             }
@@ -37,12 +39,12 @@ class Pong extends Actor {
           sender ! PongMessage
       case StopMessage =>
           println("pong stopped")
-          context.stop(self)
+          //context.stop(self)
       case _ => println("Pong got something unexpected.")
     }
 }
 
-object ClusterSystem extends App {
+object AkkaClusterTest extends App {
     val system = ActorSystem("PingPongSystem")
     val pong = system.actorOf(Props[Pong], name = "pong")
     val ping = system.actorOf(Props(new Ping(pong)), name = "ping")
@@ -52,6 +54,12 @@ object ClusterSystem extends App {
     cluster.join(cluster.selfAddress)
     ClusterClientReceptionist(system).registerService(pong)
     ClusterClientReceptionist(system).registerService(ping)
+	
+	// stop the cluster
+	var message = ""
+	while (message != "exit") {
+		message = readLine()
+	}
     
     // commented-out so you can see all the output
     system.terminate()
