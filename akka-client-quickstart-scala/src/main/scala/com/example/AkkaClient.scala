@@ -16,14 +16,20 @@ object AkkaClientTest extends App {
       ActorPath.fromString("akka://PingPongSystem@127.0.0.1:2552/system/receptionist"))
     val settings = ClusterClientSettings(system).withInitialContacts(initialContacts)
     val client = system.actorOf(ClusterClient.props(settings), "client")
-	
-	// start the action
-	var message = ""
-	while (message != "exit") {
-		println("Enter your text message: ")
-		message = readLine()
-		client ! ClusterClient.Send("/user/ping", message, localAffinity = true) //sending first ping
-	}
+    
+    // start the action
+    var message = ""
+    while (message != "exit") {
+        println("Enter your text message: ")
+        message = readLine()
+        
+        if(message == "ping") {
+            client ! ClusterClient.Send("/user/pong", message, localAffinity = true) //sending one ping
+        }
+        if(message == "pong") {
+            client ! ClusterClient.Send("/user/ping", message, localAffinity = true) //sending one pong
+        }        
+    }
     
     // commented-out so you can see all the output
     system.terminate()
