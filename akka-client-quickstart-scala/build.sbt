@@ -4,8 +4,8 @@ version := "1.0"
 
 organization := "com.example"
 
-val projectScalaVersion = "2.13.1"
-scalaVersion := "2.13.1"
+val projectScalaVersion = "2.12.1"
+scalaVersion := "2.12.1"
 
 lazy val AkkaVersion = "2.6.8"
 

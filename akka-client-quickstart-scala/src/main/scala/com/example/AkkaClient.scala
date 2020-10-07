@@ -8,27 +8,30 @@ import akka.cluster.client._
 import scala.io.StdIn.readLine
 
 object AkkaClientTest extends App {
-    val system = ActorSystem("PingPongSystem")
+    val system = ActorSystem("SparkSessionSystem")
     
     // create the client
     val initialContacts = Set(
-      ActorPath.fromString("akka://PingPongSystem@127.0.0.1:2551/system/receptionist"),
-      ActorPath.fromString("akka://PingPongSystem@127.0.0.1:2552/system/receptionist"))
+      ActorPath.fromString("akka://SparkSessionSystem@127.0.0.1:2551/system/receptionist"),
+      ActorPath.fromString("akka://SparkSessionSystem@127.0.0.1:2552/system/receptionist"))
     val settings = ClusterClientSettings(system).withInitialContacts(initialContacts)
     val client = system.actorOf(ClusterClient.props(settings), "client")
     
     // start the action
-    var message = ""
-    while (message != "exit") {
-        println("Enter your text message: ")
-        message = readLine()
+    var query = ""
+    while (query != "EXIT") {
+        println("Enter your SQL Query: ")
+        query = readLine()
         
-        if(message == "ping") {
-            client ! ClusterClient.Send("/user/pong", message, localAffinity = true) //sending one ping
+        if (query.contains("CREATE TABLE") || query.contains("SELECT") || query.contains("DROP TABLE") || query.contains("SHOW TABLES")) {
+            client ! ClusterClient.Send("/user/spark", query, localAffinity = true) //sending SQL query
         }
-        if(message == "pong") {
-            client ! ClusterClient.Send("/user/ping", message, localAffinity = true) //sending one pong
-        }        
+        else if (query.contains("EXIT")) {
+            client ! ClusterClient.Send("/user/spark", query, localAffinity = true) //sending SQL query for exit
+        }
+        else {
+            println("This query is not accepted. ")
+        }
     }
     
     // commented-out so you can see all the output
