@@ -7,6 +7,20 @@ import akka.cluster.client._
 
 import scala.io.StdIn.readLine
 
+class ClientActor(client: ActorRef) extends Actor {
+    def receive = {
+        case message if (message.toString.contains("CREATE TABLE") || message.toString.contains("SELECT") || message.toString.contains("DROP TABLE") || message.toString.contains("SHOW TABLES")) =>
+            client ! ClusterClient.Send("/user/spark", message, localAffinity = true) //sending SQL query
+        case message if message == "OK" =>
+            println(message)
+        case message if message == "EXIT" =>
+            client ! ClusterClient.Send("/user/spark", message, localAffinity = true) //sending SQL query
+            context.stop(self)
+        case _ =>
+            println("This query is not accepted. ")
+    }
+}
+
 object AkkaClientTest extends App {
     val system = ActorSystem("SparkSessionSystem")
     
@@ -16,22 +30,15 @@ object AkkaClientTest extends App {
       ActorPath.fromString("akka://SparkSessionSystem@127.0.0.1:2552/system/receptionist"))
     val settings = ClusterClientSettings(system).withInitialContacts(initialContacts)
     val client = system.actorOf(ClusterClient.props(settings), "client")
+    val cli = system.actorOf(Props(new ClientActor(client)), name = "cli")
     
     // start the action
-    var query = ""
-    while (query != "EXIT") {
+    var message = ""
+    while (message != "EXIT") {
         println("Enter your SQL Query: ")
-        query = readLine()
-        
-        if (query.contains("CREATE TABLE") || query.contains("SELECT") || query.contains("DROP TABLE") || query.contains("SHOW TABLES")) {
-            client ! ClusterClient.Send("/user/spark", query, localAffinity = true) //sending SQL query
-        }
-        else if (query.contains("EXIT")) {
-            client ! ClusterClient.Send("/user/spark", query, localAffinity = true) //sending SQL query for exit
-        }
-        else {
-            println("This query is not accepted. ")
-        }
+        message = readLine()
+        cli ! message
+        Thread.sleep(4000) // wait for 4 seconds
     }
     
     // commented-out so you can see all the output
