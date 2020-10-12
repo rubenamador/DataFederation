@@ -28,6 +28,7 @@ class SparkActor extends Actor {
         case query if query == "EXIT" =>
             spark.stop()
             println("Finish the Spark Session ...")
+            sender() ! "EXIT"
         case query if query != "EXIT" =>
             try {
                 val result = spark.sql(query.toString)
@@ -40,6 +41,7 @@ class SparkActor extends Actor {
                 case e3: org.apache.spark.sql.catalyst.parser.ParseException => println("Couldn't understand that query. Wrong syntax ")
                 case e4: org.apache.spark.sql.AnalysisException => println("Table or view not found. ")
             }
+            sender() ! "OK"
     }
 }
 
