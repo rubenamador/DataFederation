@@ -12,18 +12,7 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import org.apache.spark.sql.functions._
 import org.apache.log4j.{Level, Logger}
 
-class SparkActor extends Actor {
-    // start the Spark session
-    lazy val spark: SparkSession = SparkSession
-        .builder()
-        .master("local[*]")
-        .appName("Spark SQL basic example")
-        .getOrCreate()
-        //.config("spark.some.config.option", "some-value")
-    
-    import spark.implicits._
-    import org.apache.spark.sql.types._
-    
+class SparkActor(spark: SparkSession) extends Actor {    
     def receive = {
         case query if query == "EXIT" =>
             spark.stop()
@@ -67,7 +56,19 @@ class SparkActor extends Actor {
 
 object AkkaClusterTest extends App {
     val system = ActorSystem("SparkSessionSystem")
-    val spark_actor = system.actorOf(Props[SparkActor], name = "spark")
+    
+    // start the Spark session
+    lazy val spark: SparkSession = SparkSession
+        .builder()
+        .master("local[*]")
+        .appName("Spark SQL basic example")
+        .getOrCreate()
+        //.config("spark.some.config.option", "some-value")
+    
+    import spark.implicits._
+    import org.apache.spark.sql.types._
+    
+    val spark_actor = system.actorOf(Props(new SparkActor(spark)), name = "spark")
     
     // create the cluster
     val cluster = Cluster(system)
