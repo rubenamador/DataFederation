@@ -29,19 +29,39 @@ class SparkActor extends Actor {
             spark.stop()
             println("Finish the Spark Session ...")
             sender() ! "EXIT"
-        case query if query != "EXIT" =>
+        case query if (query.toString.contains("CREATE TABLE") || query.toString.contains("SELECT") || query.toString.contains("DROP TABLE") || query.toString.contains("SHOW TABLES")) =>
+            var response = "OK"
             try {
                 val result = spark.sql(query.toString)
                 result.show()
+
+                // Save in string the headers of the data query
+                var names = result.columns(0).toString
+                for (i <- 1 to (result.columns.length - 1)) {
+                    names = names + "," + result.columns(i).toString
+                }
+                var data = names + "\n"
+
+                // Save in string each row of the data query
+                val arr = result.collect() //Get the Array[Row] of the Dataframe
+                for (i <- 0 to (arr.length - 1)) {
+                    var row = arr(i)(0).toString
+                    for (j <- 1 to (arr(i).length - 1)) {
+                        row = row + "," + arr(i)(j).toString
+                    }
+                    data = data + row + "\n"
+                }
+                data = data + "END\n"
+                response = data
             }
             catch
             {
-                case e1: ClassNotFoundException => println("Couldn't find that query. Wrong arguments ")
-                case e2: InterruptedException => println("Session interrupted. ")
-                case e3: org.apache.spark.sql.catalyst.parser.ParseException => println("Couldn't understand that query. Wrong syntax ")
-                case e4: org.apache.spark.sql.AnalysisException => println("Table or view not found. ")
+                case e1: ClassNotFoundException => response = "ClassNotFoundException: Couldn't find that query. Wrong arguments "
+                case e2: InterruptedException => response = "InterruptedException: Session interrupted. "
+                case e3: org.apache.spark.sql.catalyst.parser.ParseException => response = "ParseException: Couldn't understand that query. Wrong syntax "
+                case e4: org.apache.spark.sql.AnalysisException => response = "AnalysisException: Table or view not found. "
             }
-            sender() ! "OK"
+            sender() ! response
     }
 }
 

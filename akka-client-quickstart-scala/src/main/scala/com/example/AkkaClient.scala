@@ -11,11 +11,16 @@ class ClientActor(client: ActorRef) extends Actor {
     def receive = {
         case message if (message.toString.contains("CREATE TABLE") || message.toString.contains("SELECT") || message.toString.contains("DROP TABLE") || message.toString.contains("SHOW TABLES")) =>
             client ! ClusterClient.Send("/user/spark", message, localAffinity = true) //sending SQL query
-        case message if message == "OK" =>
+        case message if (message.toString.contains("Exception")) =>
             println(message)
         case message if message == "EXIT" =>
             client ! ClusterClient.Send("/user/spark", message, localAffinity = true) //sending SQL query
             context.stop(self)
+        case message if (message.toString.contains("END")) =>
+            val iterator = message.toString.split("\n").toIterator
+            while(iterator.hasNext) {
+                println(iterator.toIterator.next())
+            }
         case _ =>
             println("This query is not accepted. ")
     }
