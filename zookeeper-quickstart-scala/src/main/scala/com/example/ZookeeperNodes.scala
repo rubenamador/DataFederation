@@ -67,8 +67,8 @@ object ZookeeperServerTest extends App {
     
     // Input for interaction with Zookeeper Server
     var option = "0"
-    while (option != "6" && option.toLowerCase != "exit") {
-        print("OPTIONS: \n 1. Create ZNode \n 2. Check ZNode \n 3. Get Data \n 4. Set Data \n 5. Delete ZNode \n 6. Exit \n")
+    while (option != "7" && option.toLowerCase != "exit") {
+        print("OPTIONS: \n 1. Create ZNode \n 2. Check ZNode \n 3. Get Data \n 4. Set Data \n 5. Delete ZNode \n 6. Get Children \n 7. Exit \n")
         println("Enter your option for Zookeeper: ")
         option = readLine()
         
@@ -81,10 +81,15 @@ object ZookeeperServerTest extends App {
                 println("Node already exists: /" + path)
             }
             else {
-                println("Enter data for ZKPath: ")
-                data = readLine()
-                zk.create('/' + path, data.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)
-                println("Creating ZNode in one path...")
+                try {
+                    println("Enter data for ZKPath: ")
+                    data = readLine()
+                    zk.create('/' + path, data.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT)
+                    println("Creating ZNode in one path...")
+                }
+                catch {
+                    case e: KeeperException => println("Some node in path does not exists")
+                }
             }
             Thread.sleep(2000) // wait for 2 seconds
         }
@@ -135,17 +140,38 @@ object ZookeeperServerTest extends App {
             path = readLine()
             stat = zk.exists('/' + path, true)
             
-            if (stat != null) {
-                zk.delete('/' + path, stat.getVersion())
-                println("Deleting ZNode in one path...")
+            try {
+                if (stat != null) {
+                    zk.delete('/' + path, stat.getVersion())
+                    println("Deleting ZNode in one path...")
+                } 
+                else {
+                    println("Node does not exists")
+                }
             }
-            else {
-                println("Node does not exists")
+            catch {
+                case e: KeeperException => println("Node has children, cannot be deleted")
             }
             Thread.sleep(2000) // wait for 2 seconds
         }
+        else if (option == "6" || option.toLowerCase == "get children") { // Get Children
+            println("For root znode only push ENTER")
+            println("Enter ZKPath: ")
+            path = readLine()
+            try {
+                val children = zk.getChildren('/' + path, false)
+                for (i <- 0 to (children.size() - 1)) {
+                    println(children.get(i))
+                }
+                println("Getting ZNode children...")
+            }
+            catch {
+                case e: KeeperException => println("Node does not exists")
+            }
+            Thread.sleep(4000) // wait for 4 seconds
+        }
         else {
-            if (option != "6" && option.toLowerCase != "exit") {
+            if (option != "7" && option.toLowerCase != "exit") {
                 println("Option does not exists")
             }
             Thread.sleep(2000) // wait for 2 seconds
