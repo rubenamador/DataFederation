@@ -10,11 +10,11 @@ import scala.io.StdIn.readLine
 class ClientActor(client: ActorRef) extends Actor {
     def receive = {
         case message if (message.toString.contains("CREATE TABLE") || message.toString.contains("SELECT") || message.toString.contains("DROP TABLE") || message.toString.contains("SHOW TABLES")) =>
-            client ! ClusterClient.Send("/user/spark", message, localAffinity = true) //sending SQL query
+            client ! ClusterClient.Send("/user/zoospark", message, localAffinity = true) //sending SQL query
         case message if (message.toString.contains("Exception")) =>
             println(message)
         case message if message == "EXIT" =>
-            client ! ClusterClient.Send("/user/spark", message, localAffinity = true) //sending SQL query
+            client ! ClusterClient.Send("/user/zoospark", message, localAffinity = true) //sending SQL query
             context.stop(self)
         case message if (message.toString.contains("END")) =>
             val iterator = message.toString.split("\n").toIterator

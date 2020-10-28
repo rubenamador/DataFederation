@@ -9,6 +9,7 @@ scalaVersion := "2.12.1"
 
 lazy val AkkaVersion = "2.6.8"
 lazy val SparkVersion = "2.4.4"
+lazy val ZookeeperVersion = "3.6.1"
 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor-typed" % AkkaVersion,
@@ -19,7 +20,9 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-cluster" % AkkaVersion,
   "com.typesafe.akka" %% "akka-cluster-tools" % AkkaVersion,
   "org.apache.spark" %% "spark-core" % SparkVersion,
-  "org.apache.spark" %% "spark-sql" % SparkVersion
+  "org.apache.spark" %% "spark-sql" % SparkVersion,
+  "org.apache.zookeeper" % "zookeeper" % ZookeeperVersion
+  
 )
 
 scalaVersion in ThisBuild := projectScalaVersion
