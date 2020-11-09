@@ -27,12 +27,12 @@ class ClientActor(client: ActorRef) extends Actor {
 }
 
 object AkkaClientTest extends App {
-    val system = ActorSystem("SparkSessionSystem")
+    val system = ActorSystem("ClientSystem")
     
     // create the client
     val initialContacts = Set(
-      ActorPath.fromString("akka://SparkSessionSystem@127.0.0.1:2551/system/receptionist"),
-      ActorPath.fromString("akka://SparkSessionSystem@127.0.0.1:2552/system/receptionist"))
+      ActorPath.fromString("akka://ClusterSystem@127.0.0.1:2551/system/receptionist"),
+      ActorPath.fromString("akka://ClusterSystem@127.0.0.1:2552/system/receptionist"))
     val settings = ClusterClientSettings(system).withInitialContacts(initialContacts)
     val client = system.actorOf(ClusterClient.props(settings), "client")
     val cli = system.actorOf(Props(new ClientActor(client)), name = "cli")

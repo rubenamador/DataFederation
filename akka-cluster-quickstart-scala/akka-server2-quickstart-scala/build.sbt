@@ -1,4 +1,4 @@
-name := "akka-cluster-quickstart-scala"
+name := "akka-server2-quickstart-scala"
 
 version := "1.0"
 
@@ -21,8 +21,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-cluster-tools" % AkkaVersion,
   "org.apache.spark" %% "spark-core" % SparkVersion,
   "org.apache.spark" %% "spark-sql" % SparkVersion,
-  "org.apache.zookeeper" % "zookeeper" % ZookeeperVersion
-  
+  "org.apache.zookeeper" % "zookeeper" % ZookeeperVersion  
 )
 
 scalaVersion in ThisBuild := projectScalaVersion

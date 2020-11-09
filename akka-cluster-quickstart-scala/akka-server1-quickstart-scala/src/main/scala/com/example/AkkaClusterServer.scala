@@ -104,14 +104,14 @@ class ZooSparkActor(spark: SparkSession, zk: ZooKeeper) extends Actor {
                 case e1: ClassNotFoundException => response = "ClassNotFoundException: Couldn't find that query. Wrong arguments "
                 case e2: InterruptedException => response = "InterruptedException: Session interrupted. "
                 case e3: org.apache.spark.sql.catalyst.parser.ParseException => response = "ParseException: Couldn't understand that query. Wrong syntax "
-                case e4: org.apache.spark.sql.AnalysisException => response = "AnalysisException: Table or view not found. "
+                case e4: org.apache.spark.sql.AnalysisException => response = "AnalysisException: Table or view already created or not found. "
             }
             sender() ! response
     }
 }
 
 object AkkaClusterTest extends App {
-    val system = ActorSystem("SparkSessionSystem")
+    val system = ActorSystem("ClusterSystem")
     
     // start the Spark session
     lazy val spark: SparkSession = SparkSession
