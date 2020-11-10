@@ -52,11 +52,7 @@ class ZooKeeperConnection {
 class ZooSparkActor(spark: SparkSession, zk: ZooKeeper) extends Actor {
     def receive = {
         case query if query == "EXIT" =>
-            spark.stop()
-            println("Finish the Spark Session ...")
-            zk.close()
-            println("Finish the Zookeeper Connection ...")
-            sender() ! "EXIT"
+            println("Finish the Client Application ...")
         case query if (query.toString.contains("CREATE TABLE") || query.toString.contains("SELECT") || query.toString.contains("DROP TABLE") || query.toString.contains("SHOW TABLES")) =>
             var response = "OK"
             try {
@@ -159,5 +155,9 @@ object AkkaClusterTest extends App {
     }
     
     // commented-out so you can see all the output
+    spark.stop()
+    println("Finish the Spark Session ...")
+    zk.close()
+    println("Finish the Zookeeper Connection ...")
     system.terminate()
 }
