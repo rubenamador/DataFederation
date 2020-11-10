@@ -56,6 +56,36 @@ class ZooSparkActor(spark: SparkSession, zk: ZooKeeper) extends Actor {
         case query if (query.toString.contains("CREATE TABLE") || query.toString.contains("SELECT") || query.toString.contains("DROP TABLE") || query.toString.contains("SHOW TABLES")) =>
             var response = "OK"
             try {
+                //Check znodes with tables in Spark Session
+                import spark.implicits._
+                val tables = spark.catalog.listTables.map(_.name).collect()
+                val znodes = zk.getChildren("/mymetadata", false)
+                for (i <- 0 to (znodes.size() - 1)) {
+                    var exist_table = false
+                    for (j <- 0 to (tables.length - 1)) {
+                        if (znodes.get(i).toString == tables(j).toString) {
+                            exist_table = true
+                        }
+                    }
+                    if (!exist_table) { // if znode exist but table is not in Spark Session -> CREATE TABLE
+                        val create_table = new String(zk.getData("/mymetadata/" + znodes.get(i).toString, false, null), "UTF-8")
+                        spark.sql(create_table.toString)
+                    }
+                }
+                for (i <- 0 to (tables.length - 1)) {
+                    var exist_znode = false
+                    for (j <- 0 to (znodes.size() - 1)) {
+                        if (tables(i).toString == znodes.get(j).toString) {
+                            exist_znode = true
+                        }
+                    }
+                    if (!exist_znode) { // if znode not exist but table is in Spark Session -> DROP TABLE
+                        val drop_table = "DROP TABLE " + tables(i).toString
+                        spark.sql(drop_table)
+                    }
+                }
+                
+                // Execute query in Spark Session
                 val result = spark.sql(query.toString)
                 result.show()
                 
@@ -91,7 +121,7 @@ class ZooSparkActor(spark: SparkSession, zk: ZooKeeper) extends Actor {
                     val table_name = array(2)
                     val path = "/mymetadata/" + table_name
                     val stat = zk.exists(path, true)
-                    zk.delete(path, stat.getVersion())
+                    zk.delete(path, stat.getVersion()) // Deleting znode
                     response = "Table \"" + table_name + "\" removed correctly \nEND"
                 }
             }
