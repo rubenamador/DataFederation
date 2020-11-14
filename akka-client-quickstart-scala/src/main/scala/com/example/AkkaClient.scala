@@ -42,7 +42,7 @@ object AkkaClientTest extends App {
         println("Enter your SQL Query: ")
         message = readLine()
         cli ! message
-        Thread.sleep(4000) // wait for 4 seconds
+        Thread.sleep(5500) // wait for 5.5 seconds
     }
     
     // commented-out so you can see all the output

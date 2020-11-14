@@ -144,6 +144,8 @@ object AkkaClusterTest extends App {
         .builder()
         .master("local[*]")
         .appName("Spark SQL basic example")
+        .config("spark.cassandra.connection.host", "192.168.99.100")
+        .config("spark.cassandra.connection.port", 9042)
         .getOrCreate()
         //.config("spark.some.config.option", "some-value")
     
