@@ -110,14 +110,14 @@ class ZooSparkActor(spark: SparkSession, zk: ZooKeeper) extends Actor {
                     response = data
                 }
                 else if (query.toString.contains("CREATE TABLE")) {                
-                    val array = query.toString.split(" ").toArray
+                    val array = query.toString.replace("("," ").split(" ").toArray
                     val table_name = array(2)
                     val path = "/mymetadata/" + table_name
                     zk.create(path, query.toString.getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT) // Creating znode
                     response = "Table \"" + table_name + "\" created correctly \nEND"
                 }
                 else if (query.toString.contains("DROP TABLE")) {
-                    val array = query.toString.split(" ").toArray
+                    val array = query.toString.replace("("," ").split(" ").toArray
                     val table_name = array(2)
                     val path = "/mymetadata/" + table_name
                     val stat = zk.exists(path, true)
