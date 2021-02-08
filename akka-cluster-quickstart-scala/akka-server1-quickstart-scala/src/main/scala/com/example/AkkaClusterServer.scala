@@ -144,7 +144,7 @@ object AkkaClusterTest extends App {
         .builder()
         .master("local[*]")
         .appName("Spark SQL basic example")
-        .config("spark.cassandra.connection.host", "192.168.99.100")
+        .config("spark.cassandra.connection.host", "localhost")
         .config("spark.cassandra.connection.port", 9042)
         .getOrCreate()
         //.config("spark.some.config.option", "some-value")
@@ -154,7 +154,7 @@ object AkkaClusterTest extends App {
     
     // start the Zookeeper connection
     val conn = new ZooKeeperConnection()
-    val zk = conn.connect("192.168.99.100") //this host is my docker-machine ip --- you can put another host as "localhost"
+    val zk = conn.connect("localhost") //this host is my docker-machine ip --- you can put another host as "192.168.99.100"
     
     // Creating root znode if not exists
     var path = "/mymetadata"
